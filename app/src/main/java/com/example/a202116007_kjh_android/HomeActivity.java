@@ -1,15 +1,10 @@
 package com.example.a202116007_kjh_android;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.widget.Button;
-import android.widget.EditText;
+import android.os.Handler;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -17,69 +12,40 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class LoginActivity extends AppCompatActivity {
-    private EditText studentIdEditText, nameEditText;
-    private Button loginButton;
-    private TextView userNameTextView;
-    private TextView nextBusTextView;
-    private TextView followingBusTextView;
-    private RecyclerView timetableRecyclerView;
-    private TimetableAdapter timetableAdapter;
-    private List<BusSchedule> busSchedules;
+public class HomeActivity extends AppCompatActivity {
+
+    private TextView textViewTime;
+    private TextView textViewNextBus;
+    private List<BusSchedule> schedules;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.activity_home);
 
-        studentIdEditText = findViewById(R.id.editTextStudentId);
-        nameEditText = findViewById(R.id.editTextName);
-        loginButton = findViewById(R.id.buttonLogin);
-        userNameTextView = findViewById(R.id.userName);
-        nextBusTextView = findViewById(R.id.textViewNextBus);
-        followingBusTextView = findViewById(R.id.followingBus);
-        timetableRecyclerView = findViewById(R.id.recyclerViewTimetable);
+        TextView textViewWelcome = findViewById(R.id.textViewWelcome);
 
-        loginButton.setOnClickListener(v -> {
-            String studentId = studentIdEditText.getText().toString();
-            String name = nameEditText.getText().toString();
+        // 전달된 학번과 이름 데이터를 Intent로 받기
+        String userId = getIntent().getStringExtra("USER_ID");
+        String userName = getIntent().getStringExtra("USER_NAME");
 
-            if (!studentId.isEmpty() && !name.isEmpty()) {
-                // 로그인 정보 저장
-                SharedPreferences sharedPreferences = getSharedPreferences("UserInfo", MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putString("studentId", studentId);
-                editor.putString("name", name);
-                editor.apply();
+        // 환영 메시지 출력
+        String welcomeMessage = "환영합니다, " + userName + "님! (학번: " + userId + ")";
+        textViewWelcome.setText(welcomeMessage);
 
-                // 로그인 성공 후 메인 화면 구성
-                setContentView(R.layout.activity_main);
-                setupMainScreen(name);
-            } else {
-                Toast.makeText(LoginActivity.this, "모든 정보를 입력해주세요.", Toast.LENGTH_SHORT).show();
-            }
-        });
+        // 시간표 초기화
+        schedules = new ArrayList<>();
+        initializeSchedules();
+
+        // 현재 시간 업데이트
+        updateCurrentTime();
+
+        // 가장 가까운 버스 시간 찾기
+        updateNextBusInfo();
     }
 
-    private void setupMainScreen(String userName) {
-        userNameTextView.setText("환영합니다, " + userName + "님");
-
-        // 버스 시간표 데이터 로드
-        busSchedules = loadBusSchedules();
-
-        // 가장 가까운 버스 시간 표시
-        updateNextBusTime();
-
-        // 시간표 RecyclerView 설정
-        timetableAdapter = new TimetableAdapter(busSchedules);
-        timetableRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        timetableRecyclerView.setAdapter(timetableAdapter);
-    }
-
-    private List<BusSchedule> loadBusSchedules() {
-        // 이미지 기반 버스 시간표 데이터 추가
-        List<BusSchedule> schedules = new ArrayList<>();
-        // 오전 시간표 (A호차, B호차 구분)
+    private void initializeSchedules() {
+        //오전
         schedules.add(new BusSchedule("08:00", "학교", "A호차"));
         schedules.add(new BusSchedule("08:05", "문화체육센터", "A호차"));
         schedules.add(new BusSchedule("08:10", "청춘관", "A호차"));
@@ -135,23 +101,35 @@ public class LoginActivity extends AppCompatActivity {
         schedules.add(new BusSchedule("18:20", "문화체육센터", "A호차"));
         schedules.add(new BusSchedule("23:00", "학교", "A호차"));
         schedules.add(new BusSchedule("23:05", "청춘관", "A호차"));
-        return schedules;
     }
 
-    private void updateNextBusTime() {
-        // 현재 시간 기준으로 가장 가까운 버스 시간 계산
-        String currentTime = new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date());
-        boolean foundNextBus = false;
-        for (BusSchedule schedule : busSchedules) {
-            if (schedule.getDepartureTime().compareTo(currentTime) > 0) {
-                if (!foundNextBus) {
-                    nextBusTextView.setText("다음 버스: " + schedule.getDepartureTime() + " (" + schedule.getDestination() + ", " + schedule.getBusType() + ")");
-                    foundNextBus = true;
-                } else {
-                    followingBusTextView.setText("그 다음 버스: " + schedule.getDepartureTime() + " (" + schedule.getDestination() + ", " + schedule.getBusType() + ")");
-                    break;
-                }
+    private void updateCurrentTime() {
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                String currentTime = new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date());
+                textViewTime.setText("현재 시간: " + currentTime);
+                handler.postDelayed(this, 1000);
             }
+        }, 1000);
+    }
+
+    private void updateNextBusInfo() {
+        String currentTime = new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date());
+        BusSchedule nextBus = null;
+
+        for (BusSchedule schedule : schedules) {
+            if (schedule.getTime().compareTo(currentTime) > 0) {
+                nextBus = schedule;
+                break;
+            }
+        }
+
+        if (nextBus != null) {
+            textViewNextBus.setText("다음 버스: " + nextBus.getTime() + " - " + nextBus.getLocation() + " (" + nextBus.getBus() + ")");
+        } else {
+            textViewNextBus.setText("더 이상 버스가 없습니다.");
         }
     }
 }

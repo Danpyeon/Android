@@ -8,26 +8,26 @@ import android.content.Intent;
 import androidx.core.app.NotificationCompat;
 
 public class BusSchedule {
-    private String departureTime;
-    private String destination;
-    private String busType;
+    private String time;
+    private String location;
+    private String bus;
 
-    public BusSchedule(String departureTime, String destination, String busType) {
-        this.departureTime = departureTime;
-        this.destination = destination;
-        this.busType = busType;
+    public BusSchedule(String time, String location, String bus) {
+        this.time = time;
+        this.location = location;
+        this.bus = bus;
     }
 
-    public String getDepartureTime() {
-        return departureTime;
+    public String getTime() {
+        return time;
     }
 
-    public String getDestination() {
-        return destination;
+    public String getLocation() {
+        return location;
     }
 
-    public String getBusType() {
-        return busType;
+    public String getBus() {
+        return bus;
     }
 }
 
