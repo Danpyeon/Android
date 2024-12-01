@@ -1,52 +1,47 @@
 package com.example.a202116007_kjh_android;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.widget.Button;
-import android.widget.TextView;
-
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-import java.text.SimpleDateFormat;
+import com.example.a202116007_kjh_android.BusSchedule;
+import com.example.a202116007_kjh_android.R;
+
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
-public class HomeActivity extends AppCompatActivity {
+public class TimetableActivity extends AppCompatActivity {
 
-    private TextView textViewTime;
-    private TextView textViewNextBus;
-    private List<BusSchedule> schedules = new ArrayList<>();
+    private RecyclerView recyclerViewTimetable;
+    private TimetableAdapter adapter;
+    private List<BusSchedule> schedules;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home);
+        setContentView(R.layout.activity_timetable);
 
-        textViewTime = findViewById(R.id.textViewCurrentTime);
-        textViewNextBus = findViewById(R.id.textViewNextBus);
-        TextView textViewWelcome = findViewById(R.id.textViewWelcome);
+        recyclerViewTimetable = findViewById(R.id.recyclerViewTimetable);
+        recyclerViewTimetable.setLayoutManager(new LinearLayoutManager(this));
 
-        // 사용자 데이터
-        String userId = getIntent().getStringExtra("USER_ID");
-        String userName = getIntent().getStringExtra("USER_NAME");
-        textViewWelcome.setText("환영합니다, " + userName + "님! (학번: " + userId + ")");
-
-        Button buttonViewTimetable = findViewById(R.id.buttonViewTimetable);
-        buttonViewTimetable.setOnClickListener(v -> showTimetableDialog());
-
-        // 시간표 초기화
-
+        schedules = new ArrayList<>();
         initializeSchedules();
 
-        // 현재 시간 및 버스 정보 업데이트
-        updateCurrentTime();
-        updateNextBusInfo();
+        // 오전/오후 데이터 나누기
+        String type = getIntent().getStringExtra("TIMETABLE_TYPE");
+        List<BusSchedule> filteredSchedules = new ArrayList<>();
+        if ("morning".equals(type)) {
+            filteredSchedules = filterSchedulesByTime("00:00", "12:00");
+        } else if ("afternoon".equals(type)) {
+            filteredSchedules = filterSchedulesByTime("12:00", "23:59");
+        }
+
+        adapter = new TimetableAdapter(filteredSchedules);
+        recyclerViewTimetable.setAdapter(adapter);
     }
 
+    // 초기 시간표 데이터
     private void initializeSchedules() {
         //오전
         schedules.add(new BusSchedule("08:00", "학교", "A호차"));
@@ -106,48 +101,14 @@ public class HomeActivity extends AppCompatActivity {
         schedules.add(new BusSchedule("23:05", "청춘관", "A호차"));
     }
 
-    private void showTimetableDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("시간표 확인");
-        builder.setItems(new CharSequence[]{"오전 시간표", "오후 시간표"}, (dialog, which) -> {
-            Intent intent = new Intent(HomeActivity.this, TimetableActivity.class);
-            if (which == 0) {
-                intent.putExtra("TIMETABLE_TYPE", "morning");
-            } else {
-                intent.putExtra("TIMETABLE_TYPE", "afternoon");
-            }
-            startActivity(intent);
-        });
-        builder.create().show();
-    }
-
-    private void updateCurrentTime() {
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                String currentTime = new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date());
-                textViewTime.setText("현재 시간: " + currentTime);
-                handler.postDelayed(this, 1000);
-            }
-        }, 1000);
-    }
-
-    private void updateNextBusInfo() {
-        String currentTime = new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date());
-        BusSchedule nextBus = null;
-
+    // 시간 범위로 필터링
+    private List<BusSchedule> filterSchedulesByTime(String startTime, String endTime) {
+        List<BusSchedule> filtered = new ArrayList<>();
         for (BusSchedule schedule : schedules) {
-            if (schedule.getTime().compareTo(currentTime) > 0) {
-                nextBus = schedule;
-                break;
+            if (schedule.getTime().compareTo(startTime) >= 0 && schedule.getTime().compareTo(endTime) < 0) {
+                filtered.add(schedule);
             }
         }
-
-        if (nextBus != null ) {
-            textViewNextBus.setText("다음 버스: " + nextBus.getTime() + " - " + nextBus.getLocation() + " (" + nextBus.getBus() + ")");
-        } else {
-            textViewNextBus.setText("더 이상 버스가 없습니다.");
-        }
+        return filtered;
     }
 }

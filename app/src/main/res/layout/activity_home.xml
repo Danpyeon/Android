@@ -3,21 +3,80 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="#FFFFFF">
 
+    <!-- 상단 로고 -->
+    <ImageView
+        android:id="@+id/homeLogo"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:src="@drawable/logo_cnsu"
+        android:layout_gravity="center"
+        android:contentDescription="Home Logo"
+        android:layout_marginBottom="24dp" />
+
+    <!-- 환영 메시지 -->
     <TextView
         android:id="@+id/textViewWelcome"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="환영 메시지가 여기에 표시됩니다."
-        android:textSize="18sp"
-        android:paddingBottom="16dp" />
+        android:text="환영합니다, 사용자님!"
+        android:textSize="20sp"
+        android:textColor="#333333"
+        android:gravity="center"
+        android:layout_marginBottom="16dp" />
 
-    <!-- 추가적인 요소 예시 -->
+    <!-- 현재 시간 -->
     <TextView
-        android:id="@+id/textViewContent"
-        android:layout_width="wrap_content"
+        android:id="@+id/textViewCurrentTime"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="여기에 다른 정보를 표시할 수 있습니다." />
+        android:text="현재 시간: 00:00"
+        android:textSize="18sp"
+        android:textColor="#6200EE"
+        android:gravity="center"
+        android:layout_marginBottom="16dp" />
+
+    <!-- 다음 버스 정보 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/rounded_card"
+        android:padding="16dp"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:id="@+id/textViewNextBus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="다음 버스: 08:00 학교 (A호차)"
+            android:textSize="18sp"
+            android:textColor="#333333"
+            android:layout_marginBottom="8dp" />
+    </LinearLayout>
+
+    <!-- 추가 콘텐츠 -->
+    <TextView
+        android:id="@+id/textViewAdditionalContent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="버스 시간표를 확인하려면 하단 메뉴를 사용하세요."
+        android:textSize="14sp"
+        android:textColor="#999999"
+        android:gravity="center" />
+
+    <Button
+        android:id="@+id/buttonViewTimetable"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="시간표 확인"
+        android:textSize="16sp"
+        android:padding="12dp"
+        android:backgroundTint="#6200EE"
+        android:textColor="#FFFFFF"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp" />
 </LinearLayout>
 

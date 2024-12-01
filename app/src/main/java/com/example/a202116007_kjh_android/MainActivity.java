@@ -19,20 +19,24 @@ public class MainActivity extends AppCompatActivity {
         EditText editTextName = findViewById(R.id.editTextName); // 이름 입력 필드
         Button buttonLogin = findViewById(R.id.buttonLogin);
 
-        buttonLogin.setOnClickListener(v -> {
-            String id = editTextId.getText().toString(); // 학번 입력값
-            String name = editTextName.getText().toString(); // 이름 입력값
+        buttonLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String id = editTextId.getText().toString(); // 학번 입력값
+                String name = editTextName.getText().toString(); // 이름 입력값
 
-            if (!id.isEmpty() && !name.isEmpty()) {
-                // 로그인 성공: 데이터를 HomeActivity로 전달
-                Intent intent = new Intent(MainActivity.this, HomeActivity.class);
-                intent.putExtra("USER_ID", id); // 학번 전달
-                intent.putExtra("USER_NAME", name); // 이름 전달
-                startActivity(intent);
-            } else {
-                // 필드가 비어 있을 때 에러 처리
-                Toast.makeText(MainActivity.this, "학번과 이름을 모두 입력하세요.", Toast.LENGTH_SHORT).show();
+                if (!id.isEmpty() && !name.isEmpty()) {
+                    // 로그인 성
+                    Intent intent = new Intent(MainActivity.this, HomeActivity.class);
+                    intent.putExtra("USER_ID", id); // 학번 전달
+                    intent.putExtra("USER_NAME", name); // 이름 전달
+                    startActivity(intent);
+                    finish();
+                } else {
+                    //에러 처리
+                    Toast.makeText(MainActivity.this, "학번과 이름을 모두 입력하세요.", Toast.LENGTH_SHORT).show();
+                }
             }
-        });
+        } );
     }
 }
